@@ -33,18 +33,38 @@ export function Contact() {
             <Reveal className="flex flex-col gap-10" y={26} stagger={0.1}>
               <div>
                 <p className="eyebrow mb-4">Start a project</p>
+                {/*
+                  Sized so a full-length address stays on one line in this
+                  column instead of spilling into the form beside it. The
+                  <wbr> lets it break after the "@" on a narrow screen rather
+                  than mid-word.
+                */}
                 <a
                   href={`mailto:${site.email}?subject=Project%20enquiry%20—%20${site.name}`}
-                  className="group inline-flex flex-wrap items-baseline gap-2 font-display text-[clamp(1.4rem,3.2vw,2.2rem)] leading-tight font-extrabold tracking-[-0.03em] text-ivory"
+                  className="group inline-flex max-w-full items-baseline gap-2 font-display text-[clamp(0.85rem,1.4vw,1.15rem)] leading-tight font-extrabold tracking-[-0.01em] text-ivory"
                   data-cursor="link"
                 >
-                  <span className="border-b border-edge-strong pb-1 transition-colors duration-500 group-hover:border-brass">
-                    {site.email}
+                  <span className="min-w-0 break-words border-b border-edge-strong pb-1 transition-colors duration-500 group-hover:border-brass">
+                    {site.email.split("@")[0]}@<wbr />
+                    {site.email.split("@")[1]}
                   </span>
                   <ArrowUpRight
-                    className="size-5 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
+                    className="size-4 shrink-0 transition-transform duration-500 group-hover:translate-x-1 group-hover:-translate-y-1"
                     aria-hidden="true"
                   />
+                </a>
+
+                <a
+                  href={`tel:${site.phone.tel}`}
+                  className="group mt-4 inline-flex items-baseline gap-3 font-display text-[clamp(1rem,1.7vw,1.35rem)] font-bold tracking-[-0.02em] text-mist transition-colors duration-500 hover:text-ivory"
+                  data-cursor="link"
+                >
+                  <span className="font-mono text-[0.625rem] tracking-[0.2em] text-brass uppercase">
+                    Call
+                  </span>
+                  <span className="border-b border-edge pb-0.5 transition-colors duration-500 group-hover:border-brass">
+                    {site.phone.display}
+                  </span>
                 </a>
               </div>
 

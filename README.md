@@ -55,8 +55,9 @@ be touched.
 
 Placeholders to replace:
 
-- `site.email`, `site.phone`, `site.socials` — currently `hello@msdev.dz` and
-  `@msdev.dz` handles.
+- `site.socials` — still the `@msdev.dz` handles. (`site.email` and
+  `site.phone` are real; `phone.tel` must stay in international form so the
+  link dials correctly from abroad.)
 - `site.url` — your real domain. It is only the last fallback:
   `NEXT_PUBLIC_SITE_URL` wins, and on Vercel the project's own production URL
   is used automatically, so a fresh deployment already has correct canonical

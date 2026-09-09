@@ -75,6 +75,15 @@ export function Footer() {
                   {site.email}
                 </a>
               </li>
+              <li>
+                <a
+                  href={`tel:${site.phone.tel}`}
+                  className="text-sm text-ivory underline underline-offset-4 transition-colors hover:text-brass"
+                  data-cursor="link"
+                >
+                  {site.phone.display}
+                </a>
+              </li>
             </ul>
           </div>
         </div>

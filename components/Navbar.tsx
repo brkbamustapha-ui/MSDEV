@@ -223,9 +223,15 @@ export function Navbar() {
             >
               <a
                 href={`mailto:${site.email}`}
-                className="block font-display text-xl font-bold tracking-tight text-ivory"
+                className="block font-display text-lg font-bold tracking-tight break-all text-ivory"
               >
                 {site.email}
+              </a>
+              <a
+                href={`tel:${site.phone.tel}`}
+                className="mt-1.5 block font-display text-lg font-bold tracking-tight text-brass"
+              >
+                {site.phone.display}
               </a>
               <ul className="mt-4 flex flex-wrap gap-x-5 gap-y-2">
                 {site.socials.map((social) => (

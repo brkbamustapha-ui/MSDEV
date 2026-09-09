@@ -103,6 +103,7 @@ const jsonLd = {
   legalName: site.legalName,
   url: siteUrl,
   email: site.email,
+  telephone: site.phone.tel,
   description: site.description,
   image: `${siteUrl}/media/og.jpg`,
   logo: `${siteUrl}/icon.svg`,

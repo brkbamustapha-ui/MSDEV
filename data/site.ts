@@ -18,9 +18,15 @@ export const site = {
    * take precedence over it (see lib/site-url.ts).
    */
   url: "https://msdev.dz",
-  /** ——— replace with your real handles ——— */
-  email: "hello@msdev.dz",
-  phone: "+213 00 00 00 00",
+  email: "brkbamustapha@gmail.com",
+  /**
+   * `display` is what visitors read; `tel` is what the link dials, so it has
+   * to stay in international form for anyone calling from outside Algeria.
+   */
+  phone: {
+    display: "0676 41 26 68",
+    tel: "+213676412668",
+  },
   socials: [
     { label: "Instagram", handle: "@msdev.dz", href: "https://instagram.com/msdev.dz" },
     { label: "TikTok", handle: "@msdev.dz", href: "https://tiktok.com/@msdev.dz" },
