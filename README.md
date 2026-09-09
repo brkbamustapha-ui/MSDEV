@@ -91,6 +91,12 @@ first interaction, since a single gesture lifts every autoplay policy.
 Under `prefers-reduced-motion` nothing starts on its own and the footage is
 not even fetched (`preload="none"`) until the control is used.
 
+The footage is 9:16, and the hero frame is portrait on a phone but panoramic
+on a desktop. It is therefore *contained* rather than cropped, so every screen
+sees the same composition — cropping it to the middle band on a wide screen
+left so little of the pan visible that the shot read as a still. The blurred
+poster fills whatever space is left either side.
+
 Drop a real photograph or screenshot in at the same path and size and it just
 works:
 

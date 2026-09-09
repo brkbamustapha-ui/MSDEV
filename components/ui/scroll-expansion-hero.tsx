@@ -270,7 +270,30 @@ const ScrollExpandMedia = ({
                   <div className="absolute inset-0 rounded-2xl bg-void/40" />
                 </div>
               ) : (
-                <div className="relative h-full w-full">
+                <div className="relative h-full w-full overflow-hidden rounded-2xl">
+                  {/*
+                    The footage is 9:16. A phone frame is nearly that shape, so
+                    it fills edge to edge there — but a desktop frame is
+                    panoramic, and `object-cover` would keep only a narrow
+                    horizontal band of the middle, where the pan is so slight
+                    the shot reads as a still.
+
+                    So the video is contained, never cropped: the same
+                    composition everywhere. The blurred poster fills what is
+                    left either side, the way vertical video is framed
+                    everywhere it has to sit in a wide box.
+                  */}
+                  {posterSrc && (
+                    <Image
+                      src={posterSrc}
+                      alt=""
+                      aria-hidden="true"
+                      fill
+                      priority
+                      sizes="(max-width: 768px) 94vw, 1400px"
+                      className="scale-125 object-cover object-center opacity-55 blur-2xl"
+                    />
+                  )}
                   <video
                     ref={videoRef}
                     key={mediaSrc}
@@ -282,7 +305,7 @@ const ScrollExpandMedia = ({
                     loop
                     playsInline
                     preload={reducedMotion ? "none" : "auto"}
-                    className="pointer-events-none h-full w-full rounded-2xl object-cover object-center"
+                    className="pointer-events-none relative h-full w-full object-contain object-center"
                     controls={false}
                     disablePictureInPicture
                     disableRemotePlayback
@@ -295,8 +318,8 @@ const ScrollExpandMedia = ({
                     <source src={mediaSrc} type="video/mp4" />
                     {mediaSrcFallback && <source src={mediaSrcFallback} type="video/webm" />}
                   </video>
-                  <div className="pointer-events-none absolute inset-0 rounded-2xl bg-void/40" />
-                  <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-ivory/10" />
+                  <div className="pointer-events-none absolute inset-0 bg-void/35" />
+                  <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-ivory/10" />
 
                   {/*
                     Whenever the footage is not actually running — autoplay
@@ -309,7 +332,7 @@ const ScrollExpandMedia = ({
                       type="button"
                       onClick={startPlayback}
                       // sits below the wordmark rather than behind it
-                      className="group absolute inset-0 z-10 flex items-end justify-center rounded-2xl pb-[10%]"
+                      className="group absolute inset-0 z-10 flex items-end justify-center pb-[10%]"
                       aria-label="Play the background footage"
                     >
                       <span className="flex size-16 items-center justify-center rounded-full border border-ivory/40 bg-void/50 backdrop-blur-md transition-all duration-500 group-hover:scale-110 group-hover:border-brass group-hover:bg-void/70">
