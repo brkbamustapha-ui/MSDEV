@@ -1,0 +1,302 @@
+@import "tailwindcss";
+
+/* ==========================================================================
+   MSDEV — design tokens
+   Deep void, ivory, metallic steel, one restrained brass accent.
+   ========================================================================== */
+
+@theme {
+  /* surfaces */
+  --color-void: #050506;
+  --color-ink: #08090b;
+  --color-carbon: #0d0e11;
+  --color-graphite: #15171b;
+  --color-slate: #1e2126;
+
+  /* ink */
+  --color-ivory: #efebe4;
+  --color-mist: #b7bcc4;
+  --color-steel: #8a8f98;
+  --color-shadow-steel: #565b63;
+
+  /* accent */
+  --color-brass: #c8a27a;
+  --color-brass-lit: #e6c9a4;
+  --color-brass-deep: #8a6a45;
+
+  /* lines */
+  --color-edge: rgb(239 235 228 / 0.09);
+  --color-edge-strong: rgb(239 235 228 / 0.2);
+
+  /* shadcn surface tokens (used by components/ui/card.tsx) */
+  --color-background: var(--color-void);
+  --color-foreground: var(--color-ivory);
+  --color-card: var(--color-ink);
+  --color-card-foreground: var(--color-ivory);
+  --color-muted: var(--color-graphite);
+  --color-muted-foreground: var(--color-steel);
+  --color-border: var(--color-edge);
+  --color-input: var(--color-edge);
+  --color-ring: var(--color-brass);
+
+  /* type */
+  --font-display: var(--font-syne), "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: var(--font-mono-code), ui-monospace, "SFMono-Regular", Menlo, monospace;
+
+  --text-hero: clamp(3.2rem, 15vw, 14rem);
+  --text-hero--line-height: 0.82;
+  --text-hero--letter-spacing: -0.05em;
+
+  --text-mega: clamp(2.2rem, 8vw, 8.5rem);
+  --text-mega--line-height: 0.86;
+  --text-mega--letter-spacing: -0.045em;
+
+  --text-display: clamp(2rem, 4.6vw, 4.4rem);
+  --text-display--line-height: 0.96;
+  --text-display--letter-spacing: -0.035em;
+
+  --text-title: clamp(1.6rem, 3.2vw, 2.75rem);
+  --text-title--line-height: 1.04;
+  --text-title--letter-spacing: -0.025em;
+
+  --text-lede: clamp(1.02rem, 1.35vw, 1.375rem);
+  --text-lede--line-height: 1.6;
+
+  --text-micro: 0.6875rem;
+  --text-micro--line-height: 1;
+  --text-micro--letter-spacing: 0.22em;
+
+  /* motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
+
+  --animate-marquee: marquee 42s linear infinite;
+  --animate-drift: drift 14s ease-in-out infinite;
+  --animate-spin-slow: spin 9s linear infinite;
+}
+
+@keyframes marquee {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+@keyframes drift {
+  0%, 100% { transform: translate3d(0, 0, 0); }
+  50% { transform: translate3d(0, -14px, 0); }
+}
+
+/* ==========================================================================
+   Base
+   ========================================================================== */
+
+@layer base {
+  *,
+  ::after,
+  ::before {
+    border-color: var(--color-edge);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* the fixed navbar must never cover an anchored section */
+    scroll-padding-top: 6rem;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-void);
+    color: var(--color-ivory);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* no horizontal overflow, ever */
+    overflow-x: clip;
+    overscroll-behavior-y: none;
+  }
+
+  ::selection {
+    background-color: var(--color-brass);
+    color: var(--color-void);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-brass);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Keep headings from ever inheriting a synthetic bold */
+  h1, h2, h3, h4 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    text-wrap: balance;
+  }
+
+  /* Scrollbar — thin, monochrome, unobtrusive */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-slate) transparent;
+  }
+
+  ::-webkit-scrollbar {
+    width: 9px;
+    height: 9px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-slate);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-shadow-steel);
+  }
+
+  input,
+  textarea,
+  select {
+    font: inherit;
+    color: inherit;
+  }
+
+  /* iOS zooms the page when a field under 16px is focused */
+  @media (max-width: 767px) {
+    input,
+    textarea,
+    select {
+      font-size: 16px;
+    }
+  }
+}
+
+/* ==========================================================================
+   Utilities
+   ========================================================================== */
+
+/* Film grain — one static SVG turbulence layer over the whole page. */
+@utility grain {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;
+  pointer-events: none;
+  opacity: 0.038;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* A 1px hairline that fades out at both ends. */
+@utility hairline {
+  height: 1px;
+  width: 100%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    var(--color-edge-strong) 18%,
+    var(--color-edge-strong) 82%,
+    transparent
+  );
+}
+
+/* Standard page gutter, consistent from 360px to ultrawide. */
+@utility shell {
+  width: 100%;
+  margin-inline: auto;
+  max-width: 96rem;
+  padding-inline: clamp(1.25rem, 5vw, 5rem);
+}
+
+/* Small all-caps label used across the site. */
+@utility eyebrow {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--color-steel);
+}
+
+/* Metal-sheen text fill for display headings. */
+@utility text-metal {
+  background-image: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    var(--color-ivory) 32%,
+    #a9adb5 74%,
+    #6a6e76 100%
+  );
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+
+/* Fades the top and bottom edge of a scrolling column. */
+@utility mask-edges-y {
+  mask-image: linear-gradient(to bottom, transparent, #000 12%, #000 88%, transparent);
+}
+
+@utility mask-edges-x {
+  mask-image: linear-gradient(to right, transparent, #000 8%, #000 92%, transparent);
+}
+
+/* Loader used while the Spline runtime streams in. */
+@utility loader {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--color-edge-strong);
+  border-top-color: var(--color-brass);
+  animation: spin 0.9s linear infinite;
+  display: inline-block;
+}
+
+/* ==========================================================================
+   Interaction states
+   ========================================================================== */
+
+/* The bespoke cursor replaces the system one — desktop, fine pointer only. */
+body[data-cursor="on"],
+body[data-cursor="on"] * {
+  cursor: none !important;
+}
+
+/* Elements animated in by GSAP start hidden, but only once JS has confirmed
+   it will run — so the page is fully readable with JS disabled. */
+html[data-anim="ready"] [data-reveal] > * {
+  opacity: 0;
+}
+
+html[data-anim="ready"] [data-reveal-self] {
+  opacity: 0;
+}
+
+/* ==========================================================================
+   Reduced motion — honour the OS setting everywhere
+   ========================================================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  html[data-anim="ready"] [data-reveal] > *,
+  html[data-anim="ready"] [data-reveal-self] {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  .grain {
+    display: none;
+  }
+}
