@@ -91,11 +91,13 @@ first interaction, since a single gesture lifts every autoplay policy.
 Under `prefers-reduced-motion` nothing starts on its own and the footage is
 not even fetched (`preload="none"`) until the control is used.
 
-The footage is 9:16, and the hero frame is portrait on a phone but panoramic
-on a desktop. It is therefore *contained* rather than cropped, so every screen
-sees the same composition — cropping it to the middle band on a wide screen
-left so little of the pan visible that the shot read as a still. The blurred
-poster fills whatever space is left either side.
+The footage is 9:16. Rather than cropping it to fit a panoramic frame on a
+desktop — which left so little of the drone's pan visible that the shot read
+as a still — the frame itself takes the media's shape as it expands, so every
+screen sees the same composition and the rounded corners hug the picture
+instead of framing empty space. Pass the intrinsic ratio as `mediaAspect`;
+the component reads the real value back off the element once its metadata
+arrives, so swapping in footage of another shape needs no other change.
 
 Drop a real photograph or screenshot in at the same path and size and it just
 works:

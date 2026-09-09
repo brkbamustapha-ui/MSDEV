@@ -20,6 +20,8 @@ export function Hero() {
         mediaType="video"
         mediaSrc="/media/oran-santa-cruz.mp4"
         mediaSrcFallback="/media/oran-santa-cruz.webm"
+        // the footage is 576×1024; the frame takes that shape as it expands
+        mediaAspect={576 / 1024}
         posterSrc="/media/oran-santa-cruz-poster.jpg"
         bgImageSrc="/media/oran-night.jpg"
         title={site.name}

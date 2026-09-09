@@ -15,6 +15,13 @@ interface ScrollExpandMediaProps {
    * refuses H.264 with DEMUXER_ERROR_NO_SUPPORTED_STREAMS.
    */
   mediaSrcFallback?: string;
+  /**
+   * Intrinsic width / height of the media. When given, the frame takes the
+   * media's own shape as it expands, so nothing is ever cropped and the
+   * rounded corners hug the picture instead of framing empty space. The real
+   * value is read back off the element once its metadata arrives.
+   */
+  mediaAspect?: number;
   posterSrc?: string;
   bgImageSrc: string;
   title?: string;
@@ -42,6 +49,7 @@ const ScrollExpandMedia = ({
   mediaType = "video",
   mediaSrc,
   mediaSrcFallback,
+  mediaAspect,
   posterSrc,
   bgImageSrc,
   title,
@@ -61,6 +69,9 @@ const ScrollExpandMedia = ({
   const barRef = useRef<HTMLSpanElement>(null);
 
   const [opened, setOpened] = useState(false);
+
+  /** Live aspect (width / height); 0 means "not known, use the plain box". */
+  const aspectRef = useRef(mediaAspect ?? 0);
 
   const videoRef = useRef<HTMLVideoElement>(null);
   /** Mirrors the element's real state, so a stalled video can never look broken. */
@@ -89,6 +100,14 @@ const ScrollExpandMedia = ({
 
     const onPlaying = () => setPlaying(true);
     const onStopped = () => setPlaying(false);
+    const onMeta = () => {
+      if (video.videoWidth && video.videoHeight) {
+        aspectRef.current = video.videoWidth / video.videoHeight;
+        window.dispatchEvent(new Event("resize")); // re-measure the frame
+      }
+    };
+    video.addEventListener("loadedmetadata", onMeta);
+    onMeta();
 
     video.addEventListener("playing", onPlaying);
     video.addEventListener("pause", onStopped);
@@ -110,6 +129,7 @@ const ScrollExpandMedia = ({
       setPlaying(false);
 
       return () => {
+        video.removeEventListener("loadedmetadata", onMeta);
         video.removeEventListener("playing", onPlaying);
         video.removeEventListener("pause", onStopped);
         video.removeEventListener("stalled", onStopped);
@@ -124,6 +144,7 @@ const ScrollExpandMedia = ({
     window.addEventListener("keydown", attempt, { once: true });
 
     return () => {
+      video.removeEventListener("loadedmetadata", onMeta);
       video.removeEventListener("playing", onPlaying);
       video.removeEventListener("pause", onStopped);
       video.removeEventListener("stalled", onStopped);
@@ -146,8 +167,24 @@ const ScrollExpandMedia = ({
 
       const frame = frameRef.current;
       if (frame) {
-        frame.style.width = `${300 + progress * (mobile ? 650 : 1400)}px`;
-        frame.style.height = `${400 + progress * (mobile ? 220 : 400)}px`;
+        const aspect = aspectRef.current;
+        if (aspect > 0) {
+          /*
+            The frame keeps the media's own shape, so the picture is never
+            cropped and the rounded corners hug it rather than framing empty
+            space. Whatever is left over is simply the page's black.
+          */
+          const endHeight = Math.min(
+            window.innerHeight * 0.86,
+            (window.innerWidth * 0.94) / aspect,
+          );
+          const height = 400 + progress * (endHeight - 400);
+          frame.style.height = `${height}px`;
+          frame.style.width = `${height * aspect}px`;
+        } else {
+          frame.style.width = `${300 + progress * (mobile ? 650 : 1400)}px`;
+          frame.style.height = `${400 + progress * (mobile ? 220 : 400)}px`;
+        }
       }
 
       const backdrop = backdropRef.current;
@@ -160,8 +197,9 @@ const ScrollExpandMedia = ({
         word.style.transform = `scale(${1 - progress * 0.1})`;
       }
 
-      // the meta lines drift apart as the frame opens
-      const drift = progress * (mobile ? 24 : 34);
+      // The meta lines drift apart as the frame opens. Kept small on a phone,
+      // where a wider drift walks the caption straight off the screen.
+      const drift = progress * (mobile ? 7 : 34);
       if (dateRef.current) dateRef.current.style.transform = `translateX(-${drift}vw)`;
       if (cueRef.current) {
         cueRef.current.style.transform = `translateX(${drift}vw)`;
@@ -244,8 +282,10 @@ const ScrollExpandMedia = ({
             ref={frameRef}
             className="absolute top-1/2 left-1/2 z-0 -translate-x-1/2 -translate-y-1/2 rounded-[1.25rem]"
             style={{
-              width: reducedMotion ? "94vw" : "300px",
-              height: reducedMotion ? "86vh" : "400px",
+              // paint() takes over on the first frame; these are the values
+              // the server renders, kept in the media's shape when it is known
+              width: mediaAspect ? `${400 * mediaAspect}px` : "300px",
+              height: "400px",
               maxWidth: "94vw",
               maxHeight: "86vh",
               boxShadow: "0 40px 120px -20px rgba(0,0,0,0.85)",
@@ -271,29 +311,6 @@ const ScrollExpandMedia = ({
                 </div>
               ) : (
                 <div className="relative h-full w-full overflow-hidden rounded-2xl">
-                  {/*
-                    The footage is 9:16. A phone frame is nearly that shape, so
-                    it fills edge to edge there — but a desktop frame is
-                    panoramic, and `object-cover` would keep only a narrow
-                    horizontal band of the middle, where the pan is so slight
-                    the shot reads as a still.
-
-                    So the video is contained, never cropped: the same
-                    composition everywhere. The blurred poster fills what is
-                    left either side, the way vertical video is framed
-                    everywhere it has to sit in a wide box.
-                  */}
-                  {posterSrc && (
-                    <Image
-                      src={posterSrc}
-                      alt=""
-                      aria-hidden="true"
-                      fill
-                      priority
-                      sizes="(max-width: 768px) 94vw, 1400px"
-                      className="scale-125 object-cover object-center opacity-55 blur-2xl"
-                    />
-                  )}
                   <video
                     ref={videoRef}
                     key={mediaSrc}
@@ -305,7 +322,7 @@ const ScrollExpandMedia = ({
                     loop
                     playsInline
                     preload={reducedMotion ? "none" : "auto"}
-                    className="pointer-events-none relative h-full w-full object-contain object-center"
+                    className="pointer-events-none relative h-full w-full object-cover object-center"
                     controls={false}
                     disablePictureInPicture
                     disableRemotePlayback
