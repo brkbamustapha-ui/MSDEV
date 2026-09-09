@@ -3,6 +3,7 @@ import { Syne, Inter, JetBrains_Mono } from "next/font/google";
 
 import "./globals.css";
 import { site } from "@/data/site";
+import { getSiteUrl } from "@/lib/site-url";
 import { Navbar } from "@/components/Navbar";
 import { CustomCursor } from "@/components/CustomCursor";
 import { AnimationProvider } from "@/components/motion/AnimationProvider";
@@ -27,8 +28,10 @@ const mono = JetBrains_Mono({
   display: "swap",
 });
 
+const siteUrl = getSiteUrl();
+
 export const metadata: Metadata = {
-  metadataBase: new URL(site.url),
+  metadataBase: new URL(siteUrl),
   title: {
     default: "MSDEV — Premium Web Development & Digital Experiences",
     template: "%s — MSDEV",
@@ -54,7 +57,7 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: site.url,
+    url: siteUrl,
     siteName: site.name,
     title: "MSDEV — Premium Web Development & Digital Experiences",
     description:
@@ -95,14 +98,14 @@ export const viewport: Viewport = {
 const jsonLd = {
   "@context": "https://schema.org",
   "@type": "ProfessionalService",
-  "@id": `${site.url}#organization`,
+  "@id": `${siteUrl}#organization`,
   name: site.name,
   legalName: site.legalName,
-  url: site.url,
+  url: siteUrl,
   email: site.email,
   description: site.description,
-  image: `${site.url}/media/og.jpg`,
-  logo: `${site.url}/icon.svg`,
+  image: `${siteUrl}/media/og.jpg`,
+  logo: `${siteUrl}/icon.svg`,
   areaServed: "Worldwide",
   address: {
     "@type": "PostalAddress",

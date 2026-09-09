@@ -12,8 +12,12 @@ export const site = {
     "MSDEV is a web development studio building premium, custom-built websites, web apps and immersive digital experiences for brands that refuse to look like everyone else.",
   city: "Oran",
   country: "Algeria",
-  /** Used for canonical URLs, sitemap and Open Graph. Set this to your domain. */
-  url: process.env.NEXT_PUBLIC_SITE_URL ?? "https://msdev.dz",
+  /**
+   * Fallback origin for canonical URLs, sitemap and Open Graph. Set your real
+   * domain here — `NEXT_PUBLIC_SITE_URL` and Vercel's own production URL both
+   * take precedence over it (see lib/site-url.ts).
+   */
+  url: "https://msdev.dz",
   /** ——— replace with your real handles ——— */
   email: "hello@msdev.dz",
   phone: "+213 00 00 00 00",

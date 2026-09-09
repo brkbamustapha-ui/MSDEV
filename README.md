@@ -57,7 +57,10 @@ Placeholders to replace:
 
 - `site.email`, `site.phone`, `site.socials` — currently `hello@msdev.dz` and
   `@msdev.dz` handles.
-- `site.url` — your real domain (also set `NEXT_PUBLIC_SITE_URL`).
+- `site.url` — your real domain. It is only the last fallback:
+  `NEXT_PUBLIC_SITE_URL` wins, and on Vercel the project's own production URL
+  is used automatically, so a fresh deployment already has correct canonical
+  URLs, sitemap and social previews (see `lib/site-url.ts`).
 - `stats` — the `+40 projects` / `+25 clients` figures are deliberately round
   placeholders. Change the numbers; the counters animate to whatever you set.
 - `projects` — four placeholder case studies. Swap `image` for a real
