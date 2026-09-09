@@ -149,17 +149,21 @@ are clamped so no single word can outrun its column at any viewport width.
 
 ## Motion, accessibility and performance
 
-The scroll-driven intro takes over the first screen of scroll, so it is bounded
-deliberately:
+The hero's expansion is driven by the page's own scroll position: the section
+is a tall spacer with a sticky stage inside it, and progress is written
+straight to the DOM in one `requestAnimationFrame` — no React renders per
+scroll.
 
-- `prefers-reduced-motion: reduce` skips it entirely — and disables the pinned
-  portfolio, parallax, counters and reveals along with it.
-- The keyboard drives it: <kbd>↓</kbd>/<kbd>Page Down</kbd>/<kbd>Space</kbd>
-  advance, <kbd>Esc</kbd> skips.
-- A visible **Skip intro** control is always focusable.
-- Any component can release it by dispatching `msdev:unlock-hero` (the nav and
-  footer links do this, so in-page navigation works during the intro).
-- Content hidden during the intro is `inert`, so it never traps focus.
+Nothing about it is hijacked. No handler calls `preventDefault` on wheel or
+touch, and the page is never pinned to the top. This is deliberate: an earlier
+version locked the page until the intro finished, which froze scrolling
+outright when a visitor reloaded halfway down the page, and re-armed itself
+every time anyone scrolled back to the top. Ordinary scrolling, anchor links,
+the back button and scroll restoration all behave normally.
+
+Under `prefers-reduced-motion: reduce` the hero collapses to a single viewport
+with the frame already open, and the pinned portfolio, parallax, counters and
+reveals are disabled with it.
 
 Elsewhere:
 

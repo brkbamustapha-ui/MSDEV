@@ -1,21 +1,17 @@
 "use client";
 
 import { nav, site } from "@/data/site";
-import { UNLOCK_HERO_EVENT } from "@/components/ui/scroll-expansion-hero";
 
 export function Footer() {
   const year = 2026;
 
   const goTo = (href: string) => {
-    window.dispatchEvent(new CustomEvent(UNLOCK_HERO_EVENT));
     const id = href.replace("#", "");
-    window.setTimeout(() => {
-      if (id === "top") {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-        return;
-      }
-      document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 70);
+    if (id === "top") {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   return (

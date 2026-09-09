@@ -6,7 +6,6 @@ import { Menu, X } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { nav, site } from "@/data/site";
-import { UNLOCK_HERO_EVENT } from "@/components/ui/scroll-expansion-hero";
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
@@ -59,22 +58,19 @@ export function Navbar() {
     };
   }, [open]);
 
-  /**
-   * In-page navigation has to release the hero's scroll lock first, otherwise
-   * the intro would snap the page straight back to the top.
-   */
+  /** Closes the mobile overlay, then scrolls to the section. */
   const goTo = useCallback((href: string) => {
     setOpen(false);
-    window.dispatchEvent(new CustomEvent(UNLOCK_HERO_EVENT));
 
     const id = href.replace("#", "");
+    // one tick, so the overlay has released the body scroll lock first
     window.setTimeout(() => {
       if (id === "top") {
         window.scrollTo({ top: 0, behavior: "smooth" });
         return;
       }
       document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
-    }, 70);
+    }, 30);
   }, []);
 
   return (

@@ -4,7 +4,6 @@ import { useEffect } from "react";
 
 import { registerGsap, ScrollTrigger } from "./gsap";
 import { usePrefersReducedMotion } from "@/hooks/use-media-query";
-import { HERO_EXPANDED_EVENT } from "@/components/ui/scroll-expansion-hero";
 
 /**
  * Boots GSAP and flips the document into "animations will run" mode.
@@ -22,16 +21,11 @@ export function AnimationProvider() {
     const root = document.documentElement;
     if (!reducedMotion) root.dataset.anim = "ready";
 
-    /* The hero locks the page at 0 while it plays; once it releases, every
-       trigger below it needs to recompute its start/end positions. */
-    const refresh = () => ScrollTrigger.refresh();
-    window.addEventListener(HERO_EXPANDED_EVENT, refresh);
-
+    /* Late-loading fonts and images shift every trigger below them. */
     const onLoad = () => ScrollTrigger.refresh();
     window.addEventListener("load", onLoad);
 
     return () => {
-      window.removeEventListener(HERO_EXPANDED_EVENT, refresh);
       window.removeEventListener("load", onLoad);
       delete root.dataset.anim;
     };
