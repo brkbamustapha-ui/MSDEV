@@ -79,8 +79,17 @@ The video is stripped of its audio track (it autoplays muted) and written with
 `faststart`, so playback begins before the file has finished downloading. Two
 encodings are offered: H.264 first, because every device decodes it in
 hardware, with a VP9 `.webm` behind it for Chromium builds shipped without
-proprietary codecs. Under `prefers-reduced-motion` neither is loaded — the
-poster is rendered as a still instead.
+proprietary codecs.
+
+Autoplay is treated as a request, never a guarantee. The component tracks the
+element's real state and, whenever the footage is not actually running —
+autoplay refused by a browser setting or policy, playback stalled, or reduced
+motion asked for — it shows a play control over the frame instead of leaving a
+still that reads as a frozen video. It also retries playback on the visitor's
+first interaction, since a single gesture lifts every autoplay policy.
+
+Under `prefers-reduced-motion` nothing starts on its own and the footage is
+not even fetched (`preload="none"`) until the control is used.
 
 Drop a real photograph or screenshot in at the same path and size and it just
 works:

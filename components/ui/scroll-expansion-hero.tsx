@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import Image from "next/image";
 
 import { cn, clamp } from "@/lib/utils";
@@ -61,6 +61,78 @@ const ScrollExpandMedia = ({
   const barRef = useRef<HTMLSpanElement>(null);
 
   const [opened, setOpened] = useState(false);
+
+  const videoRef = useRef<HTMLVideoElement>(null);
+  /** Mirrors the element's real state, so a stalled video can never look broken. */
+  const [playing, setPlaying] = useState(false);
+
+  const startPlayback = useCallback(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    video.muted = true; // some engines only honour the property, not the attribute
+    void video.play().catch(() => setPlaying(false));
+  }, []);
+
+  /**
+   * Autoplay is a request, not a guarantee. Firefox's "Block Audio and Video"
+   * setting, enterprise policy, an extension or battery saver can all refuse
+   * it, and the element then sits on its poster looking like a frozen frame.
+   *
+   * So: ask to play, ask again once the data is there, and ask once more on
+   * the visitor's first interaction — a single gesture lifts every autoplay
+   * policy there is. Whatever happens, `playing` tracks the truth and the
+   * overlay control appears when the footage is not actually running.
+   */
+  useEffect(() => {
+    const video = videoRef.current;
+    if (mediaType !== "video" || !video) return;
+
+    const onPlaying = () => setPlaying(true);
+    const onStopped = () => setPlaying(false);
+
+    video.addEventListener("playing", onPlaying);
+    video.addEventListener("pause", onStopped);
+    video.addEventListener("stalled", onStopped);
+    video.addEventListener("error", onStopped);
+
+    if (reducedMotion) {
+      /*
+        The preference is only known on the client, so the server already sent
+        `autoplay` and the browser has very likely started the loop by now.
+        Stop it and rewind — the control below is then the only way in.
+      */
+      video.pause();
+      try {
+        video.currentTime = 0;
+      } catch {
+        // seeking before metadata arrives throws on some engines; harmless
+      }
+      setPlaying(false);
+
+      return () => {
+        video.removeEventListener("playing", onPlaying);
+        video.removeEventListener("pause", onStopped);
+        video.removeEventListener("stalled", onStopped);
+        video.removeEventListener("error", onStopped);
+      };
+    }
+
+    const attempt = () => startPlayback();
+    attempt();
+    video.addEventListener("canplay", attempt);
+    window.addEventListener("pointerdown", attempt, { once: true });
+    window.addEventListener("keydown", attempt, { once: true });
+
+    return () => {
+      video.removeEventListener("playing", onPlaying);
+      video.removeEventListener("pause", onStopped);
+      video.removeEventListener("stalled", onStopped);
+      video.removeEventListener("error", onStopped);
+      video.removeEventListener("canplay", attempt);
+      window.removeEventListener("pointerdown", attempt);
+      window.removeEventListener("keydown", attempt);
+    };
+  }, [mediaType, reducedMotion, startPlayback]);
 
   useEffect(() => {
     const section = sectionRef.current;
@@ -197,36 +269,20 @@ const ScrollExpandMedia = ({
                   />
                   <div className="absolute inset-0 rounded-2xl bg-void/40" />
                 </div>
-              ) : reducedMotion && posterSrc ? (
-                /*
-                  An autoplaying loop is motion. When the visitor has asked for
-                  less of it, the poster stands in for the footage entirely.
-                */
-                <div className="relative h-full w-full overflow-hidden rounded-2xl">
-                  <Image
-                    src={posterSrc}
-                    alt={title ? `${title} — ${date ?? "cover"}` : "Cover image"}
-                    fill
-                    priority
-                    sizes="(max-width: 768px) 94vw, 1400px"
-                    className="object-cover object-center"
-                  />
-                  <div className="absolute inset-0 bg-void/40" />
-                  <div className="absolute inset-0 ring-1 ring-inset ring-ivory/10" />
-                </div>
               ) : (
-                <div className="pointer-events-none relative h-full w-full">
+                <div className="relative h-full w-full">
                   <video
+                    ref={videoRef}
                     key={mediaSrc}
                     poster={posterSrc}
-                    autoPlay
+                    // Under reduced motion nothing starts by itself, and the
+                    // footage is not even fetched until it is asked for.
+                    autoPlay={!reducedMotion}
                     muted
                     loop
                     playsInline
-                    // the hero *is* this footage, and it is under half a
-                    // megabyte — worth fetching eagerly
-                    preload="auto"
-                    className="h-full w-full rounded-2xl object-cover object-center"
+                    preload={reducedMotion ? "none" : "auto"}
+                    className="pointer-events-none h-full w-full rounded-2xl object-cover object-center"
                     controls={false}
                     disablePictureInPicture
                     disableRemotePlayback
@@ -234,13 +290,35 @@ const ScrollExpandMedia = ({
                     aria-hidden="true"
                   >
                     {/* H.264 first: it is the one every device decodes in
-                        hardware. The fallback only gets picked up by builds
-                        that cannot play it at all. */}
+                        hardware. The fallback is picked up by builds that
+                        cannot play it at all. */}
                     <source src={mediaSrc} type="video/mp4" />
                     {mediaSrcFallback && <source src={mediaSrcFallback} type="video/webm" />}
                   </video>
-                  <div className="absolute inset-0 rounded-2xl bg-void/40" />
-                  <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-ivory/10" />
+                  <div className="pointer-events-none absolute inset-0 rounded-2xl bg-void/40" />
+                  <div className="pointer-events-none absolute inset-0 rounded-2xl ring-1 ring-inset ring-ivory/10" />
+
+                  {/*
+                    Whenever the footage is not actually running — autoplay
+                    refused, playback stalled, or reduced motion asked for —
+                    this turns a frozen-looking frame into something the
+                    visitor can obviously start.
+                  */}
+                  {!playing && (
+                    <button
+                      type="button"
+                      onClick={startPlayback}
+                      // sits below the wordmark rather than behind it
+                      className="group absolute inset-0 z-10 flex items-end justify-center rounded-2xl pb-[10%]"
+                      aria-label="Play the background footage"
+                    >
+                      <span className="flex size-16 items-center justify-center rounded-full border border-ivory/40 bg-void/50 backdrop-blur-md transition-all duration-500 group-hover:scale-110 group-hover:border-brass group-hover:bg-void/70">
+                        <svg viewBox="0 0 24 24" className="ml-0.5 size-5 fill-ivory" aria-hidden="true">
+                          <path d="M8 5.5v13l11-6.5z" />
+                        </svg>
+                      </span>
+                    </button>
+                  )}
                 </div>
               )
             ) : (
@@ -267,8 +345,13 @@ const ScrollExpandMedia = ({
 
           {/* the wordmark */}
           <div
+            /*
+              Decorative type, and it covers the whole stage — without
+              `pointer-events-none` it swallows clicks meant for the frame
+              underneath (the play control, in particular).
+            */
             className={cn(
-              "relative z-10 flex w-full flex-col items-center justify-center gap-2 text-center",
+              "pointer-events-none relative z-10 flex w-full flex-col items-center justify-center gap-2 text-center",
               textBlend ? "mix-blend-difference" : "mix-blend-normal",
             )}
           >
