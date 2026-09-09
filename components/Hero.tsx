@@ -17,8 +17,10 @@ export function Hero() {
   return (
     <div id="top" className="relative">
       <ScrollExpandMedia
-        mediaType="image"
-        mediaSrc="/media/oran-santa-cruz.jpg"
+        mediaType="video"
+        mediaSrc="/media/oran-santa-cruz.mp4"
+        mediaSrcFallback="/media/oran-santa-cruz.webm"
+        posterSrc="/media/oran-santa-cruz-poster.jpg"
         bgImageSrc="/media/oran-night.jpg"
         title={site.name}
         date="Oran · Santa Cruz · Algeria"

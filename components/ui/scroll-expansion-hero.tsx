@@ -9,6 +9,12 @@ import { usePrefersReducedMotion } from "@/hooks/use-media-query";
 interface ScrollExpandMediaProps {
   mediaType?: "video" | "image";
   mediaSrc: string;
+  /**
+   * Optional second encoding, offered only to browsers that cannot play
+   * `mediaSrc`. A Chromium built without proprietary codecs, for instance,
+   * refuses H.264 with DEMUXER_ERROR_NO_SUPPORTED_STREAMS.
+   */
+  mediaSrcFallback?: string;
   posterSrc?: string;
   bgImageSrc: string;
   title?: string;
@@ -35,6 +41,7 @@ interface ScrollExpandMediaProps {
 const ScrollExpandMedia = ({
   mediaType = "video",
   mediaSrc,
+  mediaSrcFallback,
   posterSrc,
   bgImageSrc,
   title,
@@ -190,22 +197,50 @@ const ScrollExpandMedia = ({
                   />
                   <div className="absolute inset-0 rounded-2xl bg-void/40" />
                 </div>
+              ) : reducedMotion && posterSrc ? (
+                /*
+                  An autoplaying loop is motion. When the visitor has asked for
+                  less of it, the poster stands in for the footage entirely.
+                */
+                <div className="relative h-full w-full overflow-hidden rounded-2xl">
+                  <Image
+                    src={posterSrc}
+                    alt={title ? `${title} — ${date ?? "cover"}` : "Cover image"}
+                    fill
+                    priority
+                    sizes="(max-width: 768px) 94vw, 1400px"
+                    className="object-cover object-center"
+                  />
+                  <div className="absolute inset-0 bg-void/40" />
+                  <div className="absolute inset-0 ring-1 ring-inset ring-ivory/10" />
+                </div>
               ) : (
                 <div className="pointer-events-none relative h-full w-full">
                   <video
-                    src={mediaSrc}
+                    key={mediaSrc}
                     poster={posterSrc}
                     autoPlay
                     muted
                     loop
                     playsInline
-                    preload="metadata"
-                    className="h-full w-full rounded-2xl object-cover"
+                    // the hero *is* this footage, and it is under half a
+                    // megabyte — worth fetching eagerly
+                    preload="auto"
+                    className="h-full w-full rounded-2xl object-cover object-center"
                     controls={false}
                     disablePictureInPicture
                     disableRemotePlayback
-                  />
+                    // decorative: the heading carries the meaning
+                    aria-hidden="true"
+                  >
+                    {/* H.264 first: it is the one every device decodes in
+                        hardware. The fallback only gets picked up by builds
+                        that cannot play it at all. */}
+                    <source src={mediaSrc} type="video/mp4" />
+                    {mediaSrcFallback && <source src={mediaSrcFallback} type="video/webm" />}
+                  </video>
                   <div className="absolute inset-0 rounded-2xl bg-void/40" />
+                  <div className="absolute inset-0 rounded-2xl ring-1 ring-inset ring-ivory/10" />
                 </div>
               )
             ) : (

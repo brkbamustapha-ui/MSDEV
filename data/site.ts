@@ -27,11 +27,14 @@ export const site = {
     display: "0676 41 26 68",
     tel: "+213676412668",
   },
+  /** Share links are stripped of their session/tracking query strings. */
   socials: [
-    { label: "Instagram", handle: "@msdev.dz", href: "https://instagram.com/msdev.dz" },
-    { label: "TikTok", handle: "@msdev.dz", href: "https://tiktok.com/@msdev.dz" },
-    { label: "Facebook", handle: "MSDEV", href: "https://facebook.com/msdev.dz" },
-    { label: "LinkedIn", handle: "MSDEV", href: "https://linkedin.com/company/msdev" },
+    {
+      label: "Instagram",
+      handle: "@mustapha_br_",
+      href: "https://www.instagram.com/mustapha_br_",
+    },
+    { label: "TikTok", handle: "@_bms31_", href: "https://www.tiktok.com/@_bms31_" },
   ],
 } as const;
 

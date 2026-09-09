@@ -69,17 +69,27 @@ Placeholders to replace:
 
 ### 2. Images
 
-Every image in `/public/media` is generated from vector art by
+The hero footage and its poster are real material shot at Santa Cruz. Every
+other image in `/public/media` is generated from vector art by
 [`scripts/generate-assets.mjs`](scripts/generate-assets.mjs) — nothing is
 fetched from a third-party image host at runtime, so the site works offline and
 has no licensing questions attached.
+
+The video is stripped of its audio track (it autoplays muted) and written with
+`faststart`, so playback begins before the file has finished downloading. Two
+encodings are offered: H.264 first, because every device decodes it in
+hardware, with a VP9 `.webm` behind it for Chromium builds shipped without
+proprietary codecs. Under `prefers-reduced-motion` neither is loaded — the
+poster is rendered as a still instead.
 
 Drop a real photograph or screenshot in at the same path and size and it just
 works:
 
 | File | Size | Used by |
 |---|---|---|
-| `oran-santa-cruz.jpg` | 1800×1012 | the frame the hero expands into |
+| `oran-santa-cruz.mp4` | 576×1024 | the footage the hero frame expands into (H.264) |
+| `oran-santa-cruz.webm` | 576×1024 | VP9 fallback for browsers without H.264 |
+| `oran-santa-cruz-poster.jpg` | 576×1024 | its poster, and the still shown under reduced motion |
 | `oran-night.jpg` | 1920×1200 | hero backdrop |
 | `work-0*.jpg` | 1400×1000 | project cards and case studies |
 | `og.jpg` | 1200×630 | Open Graph / social preview |

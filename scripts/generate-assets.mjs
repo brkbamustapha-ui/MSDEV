@@ -523,7 +523,8 @@ async function main() {
   await mkdir(MEDIA, { recursive: true });
   console.log("MSDEV assets →");
 
-  await toJpeg(oranBay({ width: 1800, height: 1012 }), path.join(MEDIA, "oran-santa-cruz.jpg"), 86);
+  // The hero's own footage of Santa Cruz replaced the generated still; only the
+  // night backdrop behind it is still drawn here.
   await toJpeg(oranBay({ width: 1920, height: 1200, night: true }), path.join(MEDIA, "oran-night.jpg"), 82);
 
   for (const p of PROJECT_ART) {
